@@ -1,19 +1,43 @@
 #!/usr/bin/env python
 # coding=iso-8859-1
 
+# poloniex.py: Poloniex API implementation
+#
+# Copyright © 2015 Scott Alfter
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+# code based on http://pastebin.com/8fBVpjaj
+
 import urllib
 import urllib2
 import json
 import time
 import hmac,hashlib
 
-def createTimeStamp(datestr, format="%Y-%m-%d %H:%M:%S"):
-    return time.mktime(time.strptime(datestr, format))
-
 class poloniex:
     def __init__(self, APIKey, Secret):
         self.APIKey = APIKey
         self.Secret = Secret
+
+    def createTimeStamp(self, datestr, format="%Y-%m-%d %H:%M:%S"):
+        return time.mktime(time.strptime(datestr, format))
 
     def post_process(self, before):
         after = before
@@ -24,7 +48,7 @@ class poloniex:
                 for x in xrange(0, len(after['return'])):
                     if(isinstance(after['return'][x], dict)):
                         if('datetime' in after['return'][x] and 'timestamp' not in after['return'][x]):
-                            after['return'][x]['timestamp'] = float(createTimeStamp(after['return'][x]['datetime']))
+                            after['return'][x]['timestamp'] = float(self.createTimeStamp(after['return'][x]['datetime']))
                             
         return after
 
@@ -78,8 +102,8 @@ class poloniex:
     def return24Volume(self):
         return self.api_query("return24Volume")
 
-    def returnOrderBook (self, currencyPair):
-        return self.api_query("returnOrderBook", {'currencyPair': currencyPair})
+    def returnOrderBook (self, currencyPair, depth=200):
+        return self.api_query("returnOrderBook", {'currencyPair': currencyPair, "depth": depth})
 
     def returnLoanOrders (self, currency):
         return self.api_query("returnLoanOrders", {'currency': currency})
